@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Rename episodes of a season of a TV show compatible with Jellyfin's formats
-import os, argparse
+import os, argparse, re
 
 # folder_path = ""
 # video_ext = ".mkv"
@@ -39,13 +39,14 @@ def parse_args():
     parser.add_argument("-n", "--season", type=int, default=1, help = "Season number of the TV show")
     parser.add_argument("-s", "--starting", type=int, default=0, help = "First episode number to start renaming from")
     parser.add_argument("-e", "--ending", type=int, default=float('inf'), help="Final episode number to rename")
+    parser.add_argument("-R", "--regex", default=None, help="Pattern to match files to rename (needs to be valid expression for re package)")
 
     return parser.parse_args()
 
-def get_video_names(folder_path, video_ext):
+def get_video_names(folder_path, video_ext, regex):
     files = os.listdir(folder_path)
-    # get video names with specified video_ext (exclude extension in name) 
-    return [get_name(f) for f in files if get_ext(f) == video_ext]
+    # get video names with specified video_ext (exclude extension in name) and matches regular expression if provided
+    return [get_name(f) for f in files if get_ext(f) == video_ext and regex is None or re.match(regex, f)]
 
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -85,8 +86,9 @@ if __name__ == "__main__":
     season_num = args.season
     start = args.starting
     end = args.ending
+    regex = args.regex
     
-    video_names = get_video_names(folder_path, video_ext)
+    video_names = get_video_names(folder_path, video_ext, regex)
     changed_names = []
     for video_name in video_names:
         ep_num = get_ep_num(video_name, ep_num_idx)
