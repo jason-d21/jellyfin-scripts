@@ -33,10 +33,12 @@ def get_ep_num(name, ep_num_idx):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--path", required=True, help = "Path of folder with episodes videos to modify")
-    parser.add_argument("-e", "--extension", required=True, help = "Extension of videos to modify")
-    parser.add_argument("-i", "--index", required=True, type=int, help = "Index for the episode number in the video name (i.e. where to look for ep number if there are many numbers in the name)")
-    parser.add_argument("-s", "--season", required=True, type=int, help = "Season number of the TV show")
+    parser.add_argument("-p", "--path", default=".", help = "Path of folder with episodes videos to modify")
+    parser.add_argument("-x", "--extension", required=True, help = "Extension of videos to modify")
+    parser.add_argument("-i", "--index", type=int, default=0, help = "Index for the episode number in the video name (i.e. where to look for ep number if there are many numbers in the name)")
+    parser.add_argument("-n", "--season", type=int, default=1, help = "Season number of the TV show")
+    parser.add_argument("-s", "--starting", type=int, default=0, help = "First episode number to start renaming from")
+    parser.add_argument("-e", "--ending", type=int, default=float('inf'), help="Final episode number to rename")
 
     return parser.parse_args()
 
@@ -81,12 +83,14 @@ if __name__ == "__main__":
     video_ext = f".{args.extension}"
     ep_num_idx =args.index
     season_num = args.season
+    start = args.starting
+    end = args.ending
     
     video_names = get_video_names(folder_path, video_ext)
     changed_names = []
     for video_name in video_names:
         ep_num = get_ep_num(video_name, ep_num_idx)
-        if ep_num >= 0:
+        if ep_num >= start and ep_num <= end:
             changed_names.append(f"S{season_num:02d}E{ep_num:02d}")
             
     print(f"The following {video_ext} filenames in {folder_path} will be changed:")
